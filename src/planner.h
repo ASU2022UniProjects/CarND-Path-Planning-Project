@@ -10,7 +10,7 @@
 #define TIME_INCREMENT 0.02 // second
 #define MAX_ACC_SPECS 10
 #define MPS_TO_MPH 2.237                                               // Meters per second to miles per hour
-#define MAX_SPEED_INC TIME_INCREMENT *(MAX_ACC_SPECS - 3) * MPS_TO_MPH // (sec) * (m/s^2) * (mps to mph) = mph
+#define MAX_SPEED_INC TIME_INCREMENT *(MAX_ACC_SPECS - 4) * MPS_TO_MPH // (sec) * (m/s^2) * (mps to mph) = mph
 #define MAX_SPEED_DEC TIME_INCREMENT *(MAX_ACC_SPECS - 5) * MPS_TO_MPH // (sec) * (m/s^2) * (mps to mph) = mph
 
 #define SPLINE_INCREMENT_1 30
@@ -110,7 +110,7 @@ void pushFuturePoints(vector<double> &pts_x, vector<double> &pts_y,
 
     s.set_points(pts_x, pts_y);
 
-    double target_x = 30.0;
+    double target_x = 20;
     double target_y = s(target_x);
 
     double target_dist = sqrt((target_x * target_x) + (target_y * target_y));
