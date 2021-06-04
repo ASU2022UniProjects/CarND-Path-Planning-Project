@@ -16,15 +16,16 @@ using namespace std;
 
 using json = nlohmann::json;
 
-
-double predictPosOfCarInLane(double vx, double vy, double obj_s, int prev_path_size){
+double predictPosOfCarInLane(double vx, double vy, double obj_s, int prev_path_size)
+{
   double obj_speed = sqrt(vx * vx + vy * vy);
 
   return obj_s + (0.02 * obj_speed * prev_path_size);
 }
 
-bool checkLaneSafety(SensorFusion *car_behind, SensorFusion *car_ahead,int lane_diff,int prev_path_size, double car_s){
-  double car_ahead_pos =  predictPosOfCarInLane(car_ahead->vx , car_ahead->vy, car_ahead->s, prev_path_size);
+bool checkLaneSafety(SensorFusion *car_behind, SensorFusion *car_ahead, int lane_diff, int prev_path_size, double car_s)
+{
+  double car_ahead_pos = predictPosOfCarInLane(car_ahead->vx, car_ahead->vy, car_ahead->s, prev_path_size);
   double car_behind_pos = predictPosOfCarInLane(car_behind->vx, car_behind->vy, car_behind->s, prev_path_size);
 
   return ((car_ahead_pos > car_s) && ((car_ahead_pos - car_s) > 10.0) && (car_behind_pos < car_s) && (abs(car_behind_pos - car_s) > 10.0));
@@ -72,42 +73,42 @@ vector<double> checkAheadBehind(int lane_to_check, vector<vector<SensorFusion>> 
       }
     }
   }
-  return {cars_ahead[lane_to_check].size(), cars_behind[lane_to_check].size(), min_dist_ahead, max_dist_behind, (double)checkLaneSafety(car_behind,car_ahead,abs(curr_lane-lane_to_check),prev_path_size,car_s)};
+  return {cars_ahead[lane_to_check].size(), cars_behind[lane_to_check].size(), min_dist_ahead, max_dist_behind, (double)checkLaneSafety(car_behind, car_ahead, abs(curr_lane - lane_to_check), prev_path_size, car_s)};
 }
 
-
-
-
-int costFunction(vector<vector<double>> lanes_data, int curr_lane){
+int costFunction(vector<vector<double>> lanes_data, int curr_lane)
+{
   int best_lane = curr_lane;
   double lowest_cost = DBL_MAX;
-  for(int i = 0; i < lanes_data.size(); ++i){
+  for (int i = 0; i < lanes_data.size(); ++i)
+  {
     int no_of_cars_ahead = lanes_data[i][0];
     int no_of_cars_behind = lanes_data[i][1];
     double min_dist_ahead = lanes_data[i][2];
     double max_dist_behind = lanes_data[i][3];
     bool lane_safe = (bool)(int)lanes_data[i][4];
 
-    double curr_lane_cost = no_of_cars_ahead*100 + no_of_cars_behind*25 - min_dist_ahead - max_dist_behind*(i!=curr_lane) - 100*(i==1);
+    double curr_lane_cost = no_of_cars_ahead * 75 + no_of_cars_behind * 15 - min_dist_ahead * 4 - max_dist_behind * (i != curr_lane) - 100 * (i == curr_lane);
 
-    cout << "Lane: " << i << "    Cost: "<< curr_lane_cost << "      Safety: "<< lane_safe << endl;
-    cout <<  "Max Distance: " << max_dist_behind<<endl;
-    cout <<  "Min Distance: " << min_dist_ahead<<endl;
-    if(curr_lane_cost < lowest_cost && lane_safe && abs(curr_lane-i)<2){
+    cout << "Lane: " << i << "    Cost: " << curr_lane_cost << "      Safety: " << lane_safe << endl;
+    cout << "Max Distance: " << max_dist_behind << endl;
+    cout << "Min Distance: " << min_dist_ahead << endl;
+    if (curr_lane_cost < lowest_cost && lane_safe && abs(curr_lane - i) < 2)
+    {
       best_lane = i;
       lowest_cost = curr_lane_cost;
     }
   }
-  cout << "Current lane: "<< curr_lane << endl;
-  cout << "Best lane: "<< best_lane << endl;
-  cout << "Middle lane safety: "<< (bool)(int)lanes_data[1][4] << endl;
-  cout << "Best lane safety: "<< (bool)(int)lanes_data[best_lane][4] << endl;
+  cout << "Current lane: " << curr_lane << endl;
+  cout << "Best lane: " << best_lane << endl;
+  cout << "Middle lane safety: " << (bool)(int)lanes_data[1][4] << endl;
+  cout << "Best lane safety: " << (bool)(int)lanes_data[best_lane][4] << endl;
 
   return best_lane;
-
 }
 int lane = 1;              //0-left lane, 1-middle lane, 2-right lane
 double ref_velocity = 0.0; //MPH
+bool changingLanes = false;
 
 int main()
 {
@@ -189,6 +190,11 @@ int main()
                       //   of the road.
                       auto sensor_fusion = j[1]["sensor_fusion"];
 
+                      if (car_d < (lane + 1) * LANE_WIDTH && car_d > lane * LANE_WIDTH)
+                      {
+                        changingLanes = false;
+                      }
+
                       int prev_path_size = previous_path_x.size();
 
                       if (prev_path_size > 0)
@@ -217,7 +223,7 @@ int main()
                         car.d = sensor_fusion[i][6];
 
                         double obj_speed = sqrt(car.vx * car.vx + car.vy * car.vy);
-                        double sensor_range = 400.0;
+                        double sensor_range = 300.0;
 
                         if (((car.s - car_s) >= 0.0) && ((car.s - car_s) < sensor_range))
                         {
@@ -231,16 +237,17 @@ int main()
                         if ((car.d < (4 * lane + 4)) && (car.d > (4 * lane)))
                         {
 
-                          double obj_s_future = predictPosOfCarInLane(sensor_fusion[i][3],sensor_fusion[i][4],sensor_fusion[i][5],prev_path_size);
+                          double obj_s_future = predictPosOfCarInLane(sensor_fusion[i][3], sensor_fusion[i][4], sensor_fusion[i][5], prev_path_size);
 
-                          if ((obj_s_future > car_s) && ((obj_s_future - car_s) < 17.0))
+                          if ((obj_s_future > car_s) && ((obj_s_future - car_s) < 18.0))
                           {
-                            lane_change = true;
+                            // lane_change = true;
                             max_velocity = obj_speed;
                           }
                         }
                       }
 
+                      printf("Chosen lane %d\n", lane);
                       //printf("\033c");
                       // printf("lane  - %d ", lane);
                       // printf("speed - %f ", ref_velocity);
@@ -260,7 +267,9 @@ int main()
                       {
                         ref_velocity -= MAX_SPEED_DEC;
                       }
-                      if (lane_change == true)
+
+                      // if (lane_change == true)
+                      if (changingLanes == false)
                       {
                         vector<vector<double>> lanes_data;
                         printf("Try Lane Change!\n");
@@ -269,13 +278,17 @@ int main()
                         // printf("SAFE_DIST = %f\n", SAFE_DIST);
 
                         //Get all lanes data
-                        for(int i = 0; i < 3; ++i){
-                          lanes_data.push_back(checkAheadBehind(i,cars_ahead,cars_behind,car_s,lane, prev_path_size));
+                        for (int i = 0; i < 3; ++i)
+                        {
+                          lanes_data.push_back(checkAheadBehind(i, cars_ahead, cars_behind, car_s, lane, prev_path_size));
                         }
                         //Check if adjacent lane is empty
-                        lane = costFunction(lanes_data, lane);
-
-                        printf("Chosen lane %d\n", lane);
+                        int newLane = costFunction(lanes_data, lane);
+                        if (lane != newLane)
+                        {
+                          changingLanes = true;
+                          lane = newLane;
+                        }
                       }
 
                       vector<double> pts_x;

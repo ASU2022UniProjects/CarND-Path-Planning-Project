@@ -13,9 +13,9 @@
 #define MAX_SPEED_INC TIME_INCREMENT *(MAX_ACC_SPECS - 4) * MPS_TO_MPH // (sec) * (m/s^2) * (mps to mph) = mph
 #define MAX_SPEED_DEC TIME_INCREMENT *(MAX_ACC_SPECS - 3) * MPS_TO_MPH // (sec) * (m/s^2) * (mps to mph) = mph
 
-#define SPLINE_INCREMENT_1 30
-#define SPLINE_INCREMENT_2 60
-#define SPLINE_INCREMENT_3 90
+#define SPLINE_INCREMENT_1 34
+#define SPLINE_INCREMENT_2 68
+#define SPLINE_INCREMENT_3 102
 
 #define MAX_POINTS 50
 
