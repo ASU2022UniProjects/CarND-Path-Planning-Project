@@ -11,7 +11,7 @@
 #define MAX_ACC_SPECS 10
 #define MPS_TO_MPH 2.237                                               // Meters per second to miles per hour
 #define MAX_SPEED_INC TIME_INCREMENT *(MAX_ACC_SPECS - 4) * MPS_TO_MPH // (sec) * (m/s^2) * (mps to mph) = mph
-#define MAX_SPEED_DEC TIME_INCREMENT *(MAX_ACC_SPECS - 5) * MPS_TO_MPH // (sec) * (m/s^2) * (mps to mph) = mph
+#define MAX_SPEED_DEC TIME_INCREMENT *(MAX_ACC_SPECS - 3) * MPS_TO_MPH // (sec) * (m/s^2) * (mps to mph) = mph
 
 #define SPLINE_INCREMENT_1 30
 #define SPLINE_INCREMENT_2 60

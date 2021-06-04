@@ -27,10 +27,10 @@ bool checkLaneSafety(SensorFusion *car_behind, SensorFusion *car_ahead,int lane_
   double car_ahead_pos =  predictPosOfCarInLane(car_ahead->vx , car_ahead->vy, car_ahead->s, prev_path_size);
   double car_behind_pos = predictPosOfCarInLane(car_behind->vx, car_behind->vy, car_behind->s, prev_path_size);
 
-  return ((car_ahead_pos > car_s) && ((car_ahead_pos - car_s) > 10.0) && (car_behind_pos < car_s) && (abs(car_behind_pos - car_s) > 8.0));
+  return ((car_ahead_pos > car_s) && ((car_ahead_pos - car_s) > 10.0) && (car_behind_pos < car_s) && (abs(car_behind_pos - car_s) > 10.0));
 }
 
-vector<double> checkAheadBehind(int lane_to_check, vector<vector<SensorFusion>> &cars_ahead, vector<vector<SensorFusion>> &cars_behind, double car_s, int curr_lane, int prev_path_size)
+vector<double> checkAheadBehind(int lane_to_check, vector<vector<SensorFusion>> cars_ahead, vector<vector<SensorFusion>> cars_behind, double car_s, int curr_lane, int prev_path_size)
 {
   double min_dist_ahead = 10000;
   double max_dist_behind = 10000;
@@ -78,7 +78,7 @@ vector<double> checkAheadBehind(int lane_to_check, vector<vector<SensorFusion>> 
 
 
 
-int costFunction(vector<vector<double>> &lanes_data, int curr_lane){
+int costFunction(vector<vector<double>> lanes_data, int curr_lane){
   int best_lane = curr_lane;
   double lowest_cost = DBL_MAX;
   for(int i = 0; i < lanes_data.size(); ++i){
@@ -88,10 +88,12 @@ int costFunction(vector<vector<double>> &lanes_data, int curr_lane){
     double max_dist_behind = lanes_data[i][3];
     bool lane_safe = (bool)(int)lanes_data[i][4];
 
-    cout <<  "Max Distance: " << max_dist_behind<<endl;
-    double curr_lane_cost = no_of_cars_ahead*100 + no_of_cars_behind*25 - min_dist_ahead - max_dist_behind - 200*(i==1);
+    double curr_lane_cost = no_of_cars_ahead*100 + no_of_cars_behind*25 - min_dist_ahead - max_dist_behind*(i!=curr_lane) - 100*(i==1);
+
     cout << "Lane: " << i << "    Cost: "<< curr_lane_cost << "      Safety: "<< lane_safe << endl;
-    if(curr_lane_cost < lowest_cost && lane_safe){
+    cout <<  "Max Distance: " << max_dist_behind<<endl;
+    cout <<  "Min Distance: " << min_dist_ahead<<endl;
+    if(curr_lane_cost < lowest_cost && lane_safe && abs(curr_lane-i)<2){
       best_lane = i;
       lowest_cost = curr_lane_cost;
     }
@@ -101,10 +103,6 @@ int costFunction(vector<vector<double>> &lanes_data, int curr_lane){
   cout << "Middle lane safety: "<< (bool)(int)lanes_data[1][4] << endl;
   cout << "Best lane safety: "<< (bool)(int)lanes_data[best_lane][4] << endl;
 
-  if(abs(best_lane - curr_lane) > 1 && (bool)(int)lanes_data[1][4] == false){
-    printf("Cant go to best lane, staying on current lane.");
-    best_lane = curr_lane;
-  }
   return best_lane;
 
 }
@@ -235,7 +233,7 @@ int main()
 
                           double obj_s_future = predictPosOfCarInLane(sensor_fusion[i][3],sensor_fusion[i][4],sensor_fusion[i][5],prev_path_size);
 
-                          if ((obj_s_future > car_s) && ((obj_s_future - car_s) < 20.0))
+                          if ((obj_s_future > car_s) && ((obj_s_future - car_s) < 17.0))
                           {
                             lane_change = true;
                             max_velocity = obj_speed;
@@ -258,11 +256,10 @@ int main()
                       {
                         ref_velocity += MAX_SPEED_INC;
                       }
-                      else
+                      else if (ref_velocity > max_velocity)
                       {
                         ref_velocity -= MAX_SPEED_DEC;
                       }
-
                       if (lane_change == true)
                       {
                         vector<vector<double>> lanes_data;
