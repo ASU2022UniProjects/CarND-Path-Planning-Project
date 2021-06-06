@@ -11,11 +11,11 @@
 #define MAX_ACC_SPECS 10
 #define MPS_TO_MPH 2.237                                               // Meters per second to miles per hour
 #define MAX_SPEED_INC TIME_INCREMENT *(MAX_ACC_SPECS - 4) * MPS_TO_MPH // (sec) * (m/s^2) * (mps to mph) = mph
-#define MAX_SPEED_DEC TIME_INCREMENT *(MAX_ACC_SPECS - 3) * MPS_TO_MPH // (sec) * (m/s^2) * (mps to mph) = mph
+#define MAX_SPEED_DEC TIME_INCREMENT *(MAX_ACC_SPECS - 2) * MPS_TO_MPH // (sec) * (m/s^2) * (mps to mph) = mph
 
-#define SPLINE_INCREMENT_1 30
-#define SPLINE_INCREMENT_2 60
-#define SPLINE_INCREMENT_3 90
+#define SPLINE_INCREMENT_1 33
+#define SPLINE_INCREMENT_2 66
+#define SPLINE_INCREMENT_3 99
 
 #define MAX_POINTS 50
 
@@ -73,9 +73,10 @@ void setNextWayPoints(vector<double> &pts_x, vector<double> &pts_y,
                       double car_s, double lane,
                       vector<double> &map_waypoints_s, vector<double> &map_waypoints_x, vector<double> &map_waypoints_y)
 {
-    vector<double> next_wp0 = getXY(car_s + SPLINE_INCREMENT_1, (LANE_CENTER + LANE_WIDTH * lane), map_waypoints_s, map_waypoints_x, map_waypoints_y);
-    vector<double> next_wp1 = getXY(car_s + SPLINE_INCREMENT_2, (LANE_CENTER + LANE_WIDTH * lane), map_waypoints_s, map_waypoints_x, map_waypoints_y);
-    vector<double> next_wp2 = getXY(car_s + SPLINE_INCREMENT_3, (LANE_CENTER + LANE_WIDTH * lane), map_waypoints_s, map_waypoints_x, map_waypoints_y);
+    // + (int) (SPLINE_INCREMENT_1 * (1 + 0.75*(abs(lane_change) == 2)))
+    vector<double> next_wp0 = getXY(car_s + (SPLINE_INCREMENT_1), (LANE_CENTER + LANE_WIDTH * lane), map_waypoints_s, map_waypoints_x, map_waypoints_y);
+    vector<double> next_wp1 = getXY(car_s + (SPLINE_INCREMENT_2), (LANE_CENTER + LANE_WIDTH * lane), map_waypoints_s, map_waypoints_x, map_waypoints_y);
+    vector<double> next_wp2 = getXY(car_s + (SPLINE_INCREMENT_3), (LANE_CENTER + LANE_WIDTH * lane), map_waypoints_s, map_waypoints_x, map_waypoints_y);
 
     pts_x.push_back(next_wp0[0]);
     pts_y.push_back(next_wp0[1]);
