@@ -236,7 +236,7 @@ int main()
                           if ((obj_s_future > car_s) && ((obj_s_future - car_s) < 17.0))
                           {
                             lane_change = true;
-                            max_velocity = obj_speed;
+                            max_velocity = (obj_speed * 2.237);
                           }
                         }
                       }
